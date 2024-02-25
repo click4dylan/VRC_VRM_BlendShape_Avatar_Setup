@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 using VRM;
+using static System.Net.Mime.MediaTypeNames;
 
 public class ShapeKeyAutoSetup : EditorWindow
 {
@@ -19,10 +21,11 @@ public class ShapeKeyAutoSetup : EditorWindow
     string[] other_lowwer = new string[0];
 
     //these are the blendshapes that the tool looks for
-    string[] arkit_BlendShapes = new string[] { "BrowDownLeft", "BrowDownRight", "BrowInnerUp", "BrowOuterUpLeft", "BrowOuterUpRight", "CheekPuff", "CheekSquintLeft", "CheekSquintRight", "EyeBlinkLeft", "EyeBlinkRight", "EyeLookDownLeft", "EyeLookDownRight", "EyeLookInLeft", "EyeLookInRight", "EyeLookOutLeft", "EyeLookOutRight", "EyeLookUpLeft", "EyeLookUpRight", "EyeSquintLeft", "EyeSquintRight", "EyeWideLeft", "EyeWideRight", "JawForward", "JawLeft", "JawOpen", "JawRight", "MouthClose", "MouthDimpleLeft", "MouthDimpleRight", "MouthFrownLeft", "MouthFrownRight", "MouthFunnel", "MouthLeft", "MouthLowerDownLeft", "MouthLowerDownRight", "MouthPressLeft", "MouthPressRight", "MouthPucker", "MouthRight", "MouthRollLower", "MouthRollUpper", "MouthShrugLower", "MouthShrugUpper", "MouthSmileLeft", "MouthSmileRight", "MouthStretchLeft", "MouthStretchRight", "MouthUpperUpLeft", "MouthUpperUpRight", "NoseSneerLeft", "NoseSneerRight", "TongueOut" };
+    string[] arkit_BlendShapes = new string[] { "eyeLookOutLeft", "eyeLookOutRight", "eyeLookInLeft", "eyeLookInRight", "eyeLookUpLeft", "eyeLookUpRight", "eyeLookDownLeft", "eyeLookDownRight", "eyeBlinkLeft", "eyeBlinkRight", "eyeSquintLeft", "eyeSquintRight", "eyeWideLeft", "eyeWideRight", "browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight", "noseSneerLeft", "noseSneerRight", "cheekSquintLeft", "cheekSquintRight", "cheekPuff", "jawOpen", "mouthClose", "jawLeft", "jawRight", "jawForward", "mouthRollUpper", "mouthRollLower", "mouthFunnel", "mouthPucker", "mouthUpperUpLeft", "mouthUpperUpRight", "mouthLowerDownLeft", "mouthLowerDownRight", "mouthLeft", "mouthRight", "mouthSmileLeft", "mouthSmileRight", "mouthFrownLeft", "mouthFrownRight", "mouthStretchLeft", "mouthStretchRight", "mouthDimpleLeft", "mouthDimpleRight", "mouthShrugUpper", "mouthShrugLower", "mouthPressLeft", "mouthPressRight", "tongueOut" };
+    string[] arkit_BlendShapes_OutputName = new string[] { "EyeLookOutLeft", "EyeLookOutRight", "EyeLookInLeft", "EyeLookInRight", "EyeLookUpLeft", "EyeLookUpRight", "EyeLookDownLeft", "EyeLookDownRight", "EyeBlinkLeft", "EyeBlinkRight", "EyeSquintLeft", "EyeSquintRight", "EyeWideLeft", "EyeWideRight", "BrowDownLeft", "BrowDownRight", "BrowInnerUp", "BrowOuterUpLeft", "BrowOuterUpRight", "NoseSneerLeft", "NoseSneerRight", "CheekSquintLeft", "CheekSquintRight", "CheekPuff", "JawOpen", "MouthClose", "JawLeft", "JawRight", "JawForward", "MouthRollUpper", "MouthRollLower", "MouthFunnel", "MouthPucker", "MouthUpperUpLeft", "MouthUpperUpRight", "MouthLowerDownLeft", "MouthLowerDownRight", "MouthLeft", "MouthRight", "MouthSmileLeft", "MouthSmileRight", "MouthFrownLeft", "MouthFrownRight", "MouthStretchLeft", "MouthStretchRight", "MouthDimpleLeft", "MouthDimpleRight", "MouthShrugUpper", "MouthShrugLower", "MouthPressLeft", "MouthPressRight", "TongueOut" };
     string[] Other_BlendShapes = new string[] { "v_aa", "v_e", "v_ee", "v_ih", "v_oh", "v_ou", "v_sil", "v_ch", "v_dd", "v_ff", "v_kk", "v_nn", "v_pp", "v_rr", "v_ss", "v_th", "LeftBlink", "RightBlink", "Blink", "vrc.v_aa", "vrc.v_e", "vrc.v_ee", "vrc.v_ih", "vrc.v_oh", "vrc.v_ou", "vrc.v_sil", "vrc.v_ch", "vrc.v_dd", "vrc.v_ff", "vrc.v_kk", "vrc.v_nn", "vrc.v_pp", "vrc.v_rr", "vrc.v_ss", "vrc.v_th", "aa", "e", "ee", "ih", "oh", "ou", "sil", "ch", "dd", "ff", "kk", "nn", "pp", "rr", "ss", "th" };
     string[] Other_BlendShapes_Names = new string[] { "A", "E", "E", "I", "O", "U", "SIL", "CH", "DD", "FF", "KK", "NN", "PP", "RR", "SS", "TH", "Blink_L", "Blink_R", "Blink", "A", "E", "E", "I", "O", "U", "SIL", "CH", "DD", "FF", "KK", "NN", "PP", "RR", "SS", "TH", "A", "E", "E", "I", "O", "U", "SIL", "CH", "DD", "FF", "KK", "NN", "PP", "RR", "SS", "TH" };
-    NamePreset[] NamePresets = new NamePreset[] { new NamePreset { name="A", blendShapePreset=BlendShapePreset.A}, new NamePreset { name = "E", blendShapePreset = BlendShapePreset.E }, new NamePreset { name = "I", blendShapePreset = BlendShapePreset.I }, new NamePreset { name = "O", blendShapePreset = BlendShapePreset.O }, new NamePreset { name = "U", blendShapePreset = BlendShapePreset.U }, new NamePreset { name = "Blink", blendShapePreset = BlendShapePreset.Blink }, new NamePreset { name = "Blink_R", blendShapePreset = BlendShapePreset.Blink_R }, new NamePreset { name = "Blink_L", blendShapePreset = BlendShapePreset.Blink_L } };
+    NamePreset[] NamePresets = new NamePreset[] { new NamePreset { name = "A", blendShapePreset = BlendShapePreset.A }, new NamePreset { name = "E", blendShapePreset = BlendShapePreset.E }, new NamePreset { name = "I", blendShapePreset = BlendShapePreset.I }, new NamePreset { name = "O", blendShapePreset = BlendShapePreset.O }, new NamePreset { name = "U", blendShapePreset = BlendShapePreset.U }, new NamePreset { name = "Blink", blendShapePreset = BlendShapePreset.Blink }, new NamePreset { name = "Blink_R", blendShapePreset = BlendShapePreset.Blink_R }, new NamePreset { name = "Blink_L", blendShapePreset = BlendShapePreset.Blink_L } };
     [MenuItem("Tools/Vrm/Auto setup shapekeys")]
     public static void ShowWindow()
     {
@@ -126,28 +129,32 @@ public class ShapeKeyAutoSetup : EditorWindow
             {
                 string shape = shared_mesh.GetBlendShapeName(i).Trim().ToLower();
                 int index = Array.IndexOf(arkit_lowwer, shape);
+
+                string arkit_shape = shared_mesh.GetBlendShapeName(i).Trim();
+                int arkit_index = Array.IndexOf(arkit_BlendShapes, arkit_shape);
+
                 //look for arkit face tracking
-                if (index != -1)
+                if (arkit_index != -1)
                 {
-                    if (Array.IndexOf(BlendShape.ToArray(), arkit_BlendShapes[index]) != -1)
+                    if (Array.IndexOf(BlendShape.ToArray(), arkit_BlendShapes_OutputName[arkit_index]) != -1)
                     {
-                        Debug.Log($"Avatar Blendshape {BlendShape[Array.IndexOf(BlendShape.ToArray(), arkit_BlendShapes[index])]} has multiple valid blendshapes, Avatar Blendshape {arkit_BlendShapes[index]} will not be used for this VRM shape");
+                        Debug.Log($"Avatar Blendshape {BlendShape[Array.IndexOf(BlendShape.ToArray(), arkit_BlendShapes_OutputName[arkit_index])]} has multiple valid blendshapes, Avatar Blendshape {arkit_BlendShapes_OutputName[arkit_index]} will not be used for this VRM shape");
                     }
                     else
                     {
                         progress += tempProgValue;
-                        EditorUtility.DisplayProgressBar("Auto generate vrm", $"Generating {arkit_BlendShapes[index]} shape", progress);
-                        BlendShape.Add(arkit_BlendShapes[index]);
+                        EditorUtility.DisplayProgressBar("Auto generate vrm", $"Generating {arkit_BlendShapes_OutputName[arkit_index]} shape", progress);
+                        BlendShape.Add(arkit_BlendShapes_OutputName[arkit_index]);
                         var Clip = ScriptableObject.CreateInstance<BlendShapeClip>();
-                        foreach(NamePreset obj in NamePresets)
+                        foreach (NamePreset obj in NamePresets)
                         {
-                            if(obj.name == arkit_BlendShapes[index])
+                            if (obj.name == arkit_BlendShapes_OutputName[arkit_index])
                             {
                                 Clip.Preset = obj.blendShapePreset;
                             }
                         }
-                        string path = "Assets/" + SaveLocation.Split(new[] { "Assets" }, StringSplitOptions.None)[1] + $@"/{avatarName}_Clips/" + arkit_BlendShapes[index] + ".asset";
-                        Clip.BlendShapeName = arkit_BlendShapes[index];
+                        string path = "Assets/" + SaveLocation.Split(new[] { "Assets" }, StringSplitOptions.None)[1] + $@"/{avatarName}_Clips/" + arkit_BlendShapes_OutputName[arkit_index] + ".asset";
+                        Clip.BlendShapeName = arkit_BlendShapes_OutputName[arkit_index];
                         var Data = new VRM.BlendShapeBinding();
                         Data.Weight = 100;
                         Data.RelativePath = Avatar.name;
